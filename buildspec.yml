@@ -1,0 +1,31 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-south-1
+    ECR_REPO: 361769583062.dkr.ecr.ap-south-1.amazonaws.com/devbank-backend
+    ECS_CLUSTER: devbank-cluster
+    ECS_SERVICE: devbank-backend-service
+    TASK_FAMILY: devbank-backend-task
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
+  build:
+    commands:
+      - echo Building Docker image...
+      - cd backend
+      - docker build -t devbank-backend .
+      - docker tag devbank-backend:latest $ECR_REPO:latest
+  post_build:
+    commands:
+      - echo Pushing image to ECR...
+      - docker push $ECR_REPO:latest
+      - echo Deploying to ECS...
+      - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+artifacts:
+  files:
+    - '**/*'
+
