@@ -6,7 +6,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ message: "DevBank Backend is running" });
+  res.json({ message: "DevBank Backend deployed via CI/CD" });
 });
 
 app.get("/api/health", (req, res) => {
